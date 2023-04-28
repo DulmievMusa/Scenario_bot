@@ -1,0 +1,8 @@
+	except Exception:
+		bot.send_message(chat_id, user.slovar['error'])
+		bot.send_message(message.chat.id, user.slovar['start_again'])
+		bot.send_message(message.chat.id, user.slovar['choose_level'], reply_markup=user.markup_level)
+		bot.register_next_step_handler(message, choose_level, user)
+		# bot.register_next_step_handler(message, main_process, user)
+		# bot.register_next_step_handler(message, mix_question, user)
+		return
