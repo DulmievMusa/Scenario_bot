@@ -4,6 +4,8 @@ from telebot import types
 from random import shuffle
 import datetime as dt
 import config
+from data import db_session
+db_session.global_init("db/main.db")
 
 bot = telebot.TeleBot("5693296256:AAFQsYHKkbIKMhpKF8mYbTvL09hjpyt0Uyc")
 translator = googletrans.Translator()
