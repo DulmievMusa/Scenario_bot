@@ -5,6 +5,8 @@ from random import shuffle
 import datetime as dt
 import config
 from data import db_session
+from data.users import User
+from data.words_dict import slovar
 db_session.global_init("db/main.db")
 
 bot = telebot.TeleBot("5693296256:AAFQsYHKkbIKMhpKF8mYbTvL09hjpyt0Uyc")
@@ -23,7 +25,7 @@ class NoWordsInText(Exception):
 	pass
 
 
-class User:
+class User_telegram:
 	def __init__(self, level='A1', mix=True, chanlan=True):
 		self.slovar = {'choose_language': 'Select interface language\nВыберите язык интерфейса',
 					   'error': 'An error has occurred. Try again\nПроизошла ошибка. Попробуйте ещё раз',
@@ -48,32 +50,23 @@ class User:
 		self.markup_language = markup
 
 
-words_of_language = {
-	'A1': ['go', 'mum', 'home'],
-	'A2': [],
-	'B1': [],
-	'B2': [],
-	'C1': [],
-	'C2': [],
-}
+words_of_language = slovar
 
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-	user = User()
-	f = open('users.txt', mode='r', encoding='utf8')
-	text = f.read().split('\n').copy()
-	file = open('users.txt', mode='w', encoding='utf8')
-	f.close()
-	user_id = message.from_user.id
-	user_name = message.from_user.first_name
-	if text == ['']:
-		text = [f'{user_name}:{user_id}', '1']
-	elif f'{user_name}:{user_id}' not in text[-2]:
-		text[-2] += f', {user_name}:{user_id}'
-		text[-1] = str(int(text[-1]) + 1)
-	file.write('\n'.join(text))
-	file.close()
+	user = User_telegram()
+	session = db_session.create_session()
+	userik = session.query(User).filter(User.telegram_id == message.from_user.id).first()
+	session.close()
+	if not userik:
+		user1 = User()
+		user1.name = message.from_user.first_name
+		user1.telegram_id = message.from_user.id
+		db_sess = db_session.create_session()
+		db_sess.add(user1)
+		db_sess.commit()
+		db_sess.close()
 	bot.send_message(message.chat.id, user.slovar['choose_language'], reply_markup=user.markup_language)
 	bot.register_next_step_handler(message, choose_language, user)
 	return
@@ -474,9 +467,12 @@ def start_again(message, user):
 
 
 def users(chat_id):
-	file = open('users.txt', mode='r', encoding='utf8')
-	text = file.read()
-	file.close()
+	session = db_session.create_session()
+	usersi = list(session.query(User).all())
+	text = ''
+	for userik in usersi:
+		text += "name: " + userik.name + ", id: " + str(userik.telegram_id) + '\n'
+	session.close()
 	bot.send_message(chat_id, text)
 	return
 
