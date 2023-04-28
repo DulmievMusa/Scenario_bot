@@ -1,4 +1,4 @@
 googletrans==3.1.0a0
 SQLAlchemy==2.0.4
-pyTelegramBotAPI==4.7.O
+pyTelegramBotAPI==4.7.0
 SQLAlchemy-serializer==1.4.1
